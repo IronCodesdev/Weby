@@ -1,0 +1,21 @@
+{
+  "name": "weby",
+  "version": "1.0.0",
+  "description": "Multi-session desktop browser with isolated persistent tabs",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "electron test/run-tests.js"
+  },
+  "keywords": [
+    "electron",
+    "browser",
+    "multi-session",
+    "isolated-tabs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^45.4.1"
+  }
+}

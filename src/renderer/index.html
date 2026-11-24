@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weby - Multi-Session Isolated Desktop Browser</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="browser-container">
+    <!-- Tab Strip Container (Top or Side) -->
+    <header id="tab-bar-container">
+      <div id="tab-strip" role="tablist">
+        <!-- Dynamic tabs will be inserted here -->
+      </div>
+      <button id="btn-new-tab" title="Open New Isolated Session Tab (Ctrl+T)" aria-label="New Tab">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Navigation Bar: Back, Forward, Refresh, Address Bar, Session Indicator, Profiles, Settings -->
+    <nav id="nav-bar">
+      <div class="nav-controls">
+        <button id="btn-back" class="nav-btn" title="Back" disabled>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+          </svg>
+        </button>
+        <button id="btn-forward" class="nav-btn" title="Forward" disabled>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+          </svg>
+        </button>
+        <button id="btn-refresh" class="nav-btn" title="Reload (Ctrl+R)">
+          <svg id="refresh-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Address / Omnibox -->
+      <form id="address-form">
+        <div id="address-bar-wrapper">
+          <span class="security-badge" title="Isolated partition connection">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a2 2 0 0 1 2 2v2H6V3a2 2 0 0 1 2-2zm3 4V3a3 3 0 0 0-6 0v2a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/>
+            </svg>
+          </span>
+          <input type="text" id="address-input" placeholder="Enter URL or search..." spellcheck="false" autocomplete="off" />
+          <button type="submit" id="btn-go" title="Navigate">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- Active Session Badge & Tools -->
+      <div id="session-status-container">
+        <!-- User Profile Pill -->
+        <button id="btn-profile-selector" class="nav-pill-btn" title="Switch or Manage Profiles">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+          </svg>
+          <span id="active-profile-name">Default Profile</span>
+        </button>
+
+        <!-- Active Session Pill -->
+        <div id="active-session-pill" title="Click to rename this session">
+          <span class="session-dot" id="active-session-dot"></span>
+          <span id="active-session-name">Session 1</span>
+        </div>
+
+        <!-- Sessions Control Panel Button -->
+        <button id="btn-sessions-panel" class="nav-btn-text" title="Advanced Sessions Control Panel">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 3px;">
+            <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/>
+          </svg>
+          Sessions
+        </button>
+
+        <!-- Chrome Extensions Button -->
+        <button id="btn-extensions-panel" class="nav-btn-text" title="Chrome Extensions Manager">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 3px;">
+            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+          </svg>
+          Extensions
+        </button>
+
+        <!-- Settings Button -->
+        <button id="btn-settings-panel" class="nav-btn-text" title="Customizable Themes & Layout Settings">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: -2px; margin-right: 3px;">
+            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+            <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
+          </svg>
+          Settings
+        </button>
+
+        <!-- Legacy Cookies Inspector Button (preserved) -->
+        <button id="btn-session-manager" class="nav-btn-text" title="View cookies and session partition details">
+          Cookies
+        </button>
+      </div>
+    </nav>
+
+    <!-- Progress bar for page loads -->
+    <div id="load-progress-bar"></div>
+
+    <!-- Webview Host Container -->
+    <main id="webview-container">
+      <!-- Webviews are injected dynamically per tab -->
+    </main>
+
+    <!-- Modal for Session Cookies Inspection (Preserved) -->
+    <div id="cookie-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="cookie-modal-title">Isolated Session Cookies</h3>
+          <button id="btn-close-modal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="cookie-modal-desc">Partition: <code id="cookie-partition-name"></code></p>
+          <div id="cookie-list" class="cookie-list">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 1: Settings & Theme Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Customizable Layout & Themes</h3>
+          <button id="btn-close-settings" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <label class="settings-title">Theme</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="setting-theme" value="dark" id="theme-dark">
+                <span>Dark</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="setting-theme" value="light" id="theme-light">
+                <span>Light</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="setting-theme" value="custom" id="theme-custom">
+                <span>Custom</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section" id="custom-color-controls">
+            <label class="settings-title">Color Palette</label>
+            <div class="color-row">
+              <div class="color-picker-item">
+                <span class="color-label">Accent Color:</span>
+                <input type="color" id="setting-accent-color" value="#6366f1">
+                <span id="accent-color-hex" class="color-hex">#6366f1</span>
+              </div>
+              <div class="color-picker-item">
+                <span class="color-label">Background Color:</span>
+                <input type="color" id="setting-bg-color" value="#1e1e24">
+                <span id="bg-color-hex" class="color-hex">#1e1e24</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <label class="settings-title">Tab Bar Position</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="setting-tab-position" value="top" id="tab-pos-top">
+                <span>Top</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="setting-tab-position" value="side" id="tab-pos-side">
+                <span>Side (Left Sidebar)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <label class="settings-title">Density</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="setting-density" value="comfortable" id="density-comfortable">
+                <span>Comfortable</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="setting-density" value="compact" id="density-compact">
+                <span>Compact</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <span id="settings-status" class="status-saved">Settings saved automatically</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2: Advanced Sessions Control Panel Modal -->
+    <div id="sessions-modal" class="modal hidden">
+      <div class="modal-content modal-wide">
+        <div class="modal-header">
+          <h3>Advanced Sessions Control Panel</h3>
+          <button id="btn-close-sessions" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="sessions-header-actions">
+            <button id="btn-create-session" class="primary-btn">
+              + Create New Session
+            </button>
+            <span class="session-help-text">Each session has fully isolated cookies, storage, and partitions.</span>
+          </div>
+          <div id="sessions-list" class="sessions-list">
+            <!-- Dynamic session cards inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 3: Chrome Extensions Manager Modal -->
+    <div id="extensions-modal" class="modal hidden">
+      <div class="modal-content modal-wide">
+        <div class="modal-header">
+          <h3>Chrome Extensions Manager</h3>
+          <button id="btn-close-extensions" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="extensions-header-actions">
+            <button id="btn-load-unpacked-ext" class="primary-btn">
+              Load Unpacked Extension...
+            </button>
+            <p class="ext-notice">Extensions are applied to all isolated sessions within the active profile via Electron extension APIs.</p>
+          </div>
+          <div id="extensions-list" class="extensions-list">
+            <!-- Dynamic extensions inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 4: User Profiles Manager Modal -->
+    <div id="profiles-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>User Profiles</h3>
+          <button id="btn-close-profiles" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="profile-create-bar">
+            <input type="text" id="new-profile-name" placeholder="Enter new profile name..." />
+            <button id="btn-add-profile" class="primary-btn">Create Profile</button>
+          </div>
+          <div id="profiles-list" class="profiles-list">
+            <!-- Dynamic profiles inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cookie Export/Import Sub-Modal -->
+    <div id="cookie-io-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="cookie-io-title">Cookie Export / Import</h3>
+          <button id="btn-close-cookie-io" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="cookie-io-desc" style="margin-bottom: 8px; color: var(--text-muted); font-size: 12px;"></p>
+          <textarea id="cookie-io-textarea" class="code-textarea" rows="10" placeholder="Cookie JSON here..."></textarea>
+          <div class="modal-action-row" style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
+            <button id="btn-cookie-io-copy" class="nav-btn-text">Copy to Clipboard</button>
+            <button id="btn-cookie-io-submit" class="primary-btn">Import Cookies</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

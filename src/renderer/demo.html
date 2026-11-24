@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weby Session Multi-Login Test Bench</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 40px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #38bdf8;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .login-box {
+      margin-top: 24px;
+      background: #0f172a;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .logged-in {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid #10b981;
+    }
+    .logged-out {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid #ef4444;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 16px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    button.logout {
+      background: #475569;
+    }
+    button.logout:hover {
+      background: #334155;
+    }
+    .info-box {
+      margin-top: 20px;
+      padding: 14px;
+      background: #1e293b;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+      color: #cbd5e1;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Weby Isolated Session Test Bench</h1>
+    <p>This page tests and verifies multi-login capability. Each tab runs in a completely separate storage and cookie jar. Open a second tab to this same page to log in as another user simultaneously!</p>
+
+    <div class="login-box">
+      <div id="status-display" class="status-badge logged-out">Status: Not Logged In</div>
+      
+      <div id="auth-controls">
+        <label for="username-input" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Username:</label>
+        <input type="text" id="username-input" placeholder="e.g. Alice or Bob" value="Alice" />
+        <div class="btn-row">
+          <button id="btn-login" onclick="login()">Log In (Set Cookie & Storage)</button>
+          <button id="btn-logout" class="logout" onclick="logout()">Log Out</button>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div><strong>Cookies in this Tab Session:</strong></div>
+        <div id="cookie-display" style="color: #38bdf8; margin-top: 4px;">None</div>
+        <div style="margin-top: 8px;"><strong>LocalStorage in this Tab Session:</strong></div>
+        <div id="storage-display" style="color: #a7f3d0; margin-top: 4px;">None</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateDisplay() {
+      const cookies = document.cookie;
+      const storedUser = localStorage.getItem('weby_user');
+      
+      // Parse cookie
+      let cookieUser = null;
+      if (cookies) {
+        const match = cookies.match(/weby_session_user=([^;]+)/);
+        if (match) cookieUser = decodeURIComponent(match[1]);
+      }
+
+      const activeUser = cookieUser || storedUser;
+      const statusEl = document.getElementById('status-display');
+      
+      if (activeUser) {
+        statusEl.className = 'status-badge logged-in';
+        statusEl.textContent = 'Logged In as: ' + activeUser;
+      } else {
+        statusEl.className = 'status-badge logged-out';
+        statusEl.textContent = 'Status: Not Logged In';
+      }
+
+      document.getElementById('cookie-display').textContent = cookies || '(empty)';
+      document.getElementById('storage-display').textContent = storedUser ? 'weby_user = ' + storedUser : '(empty)';
+    }
+
+    function login() {
+      const user = document.getElementById('username-input').value.trim() || 'User_' + Math.floor(Math.random()*1000);
+      // Set session cookie that persists across app restarts (expires 1 year from now)
+      const date = new Date();
+      date.setFullYear(date.getFullYear() + 1);
+      document.cookie = 'weby_session_user=' + encodeURIComponent(user) + '; expires=' + date.toUTCString() + '; path=/';
+      localStorage.setItem('weby_user', user);
+      updateDisplay();
+    }
+
+    function logout() {
+      document.cookie = 'weby_session_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      localStorage.removeItem('weby_user');
+      updateDisplay();
+    }
+
+    window.addEventListener('DOMContentLoaded', updateDisplay);
+  </script>
+</body>
+</html>
